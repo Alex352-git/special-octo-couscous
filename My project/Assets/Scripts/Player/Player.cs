@@ -1,0 +1,181 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using TMPro;
+using JetBrains.Annotations;
+
+public class PlayerAutoJump : MonoBehaviour
+{
+    public float moveSpeed = 6f;
+    public float jumpForce = 12f;
+    private int CurrentHealth = 1;
+
+
+    public GameObject PlayerIdle;
+    public GameObject PlayerJump;
+    public GameObject Health1;
+    public GameObject Health2;
+    public GameObject Health3;
+    public GameObject ScoreCrown;
+
+    private bool timeRunning = false;
+    private float timePassed = 0.0f;
+    public float TargetTime = 5.0f;
+    public int MaxHealth = 3;
+    int count = 0;
+    public TextMeshProUGUI countText;
+
+    private Rigidbody2D rb;
+    private bool timeRunning2 = false;
+    private float timePassed2 = 0.0f;
+    public float TargetTime2 = 5.0f;
+    private bool CanPlayerTakeDamage = true;
+
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        CurrentHealth = 3;
+
+        if (Health1 != null) Health1.SetActive(true);
+        if (Health2 != null) Health2.SetActive(true);
+        if (Health3 != null) Health3.SetActive(true);
+
+        SetCountText();
+    }
+
+    void SetCountText()
+    {
+        if (countText != null)
+            countText.text = "Score: " + count.ToString();
+    }
+
+    void Update()
+    {
+        if (count >= 1000 && ScoreCrown != null) ScoreCrown.SetActive(true);
+
+        if (CurrentHealth == 3)
+        {
+            if (Health1 != null) Health1.SetActive(true);
+            if (Health2 != null) Health2.SetActive(true);
+            if (Health3 != null) Health3.SetActive(true);
+        }
+
+        if (CurrentHealth == 2)
+        {
+            if (Health1 != null) Health1.SetActive(true);
+            if (Health2 != null) Health2.SetActive(true);
+            if (Health3 != null) Health3.SetActive(false);
+        }
+
+        if (CurrentHealth == 1)
+        {
+            if (Health1 != null) Health1.SetActive(true);
+            if (Health2 != null) Health2.SetActive(false);
+            if (Health3 != null) Health3.SetActive(false);
+        }
+
+        float inputX = Input.GetAxis("Horizontal");
+        rb.linearVelocity = new Vector2(inputX * moveSpeed, rb.linearVelocity.y);
+
+
+        float halfWidth = Camera.main.orthographicSize * Camera.main.aspect;
+        Vector3 pos = transform.position;
+
+        if (pos.x > halfWidth) pos.x = -halfWidth;
+        else if (pos.x < -halfWidth) pos.x = halfWidth;
+
+        transform.position = pos;
+
+    }
+
+    private void FixedUpdate()
+    {
+        if (timeRunning == true)
+        {
+            if (PlayerIdle != null) PlayerIdle.SetActive(false);
+            if (PlayerJump != null) PlayerJump.SetActive(true);
+
+            if (timePassed < TargetTime)
+                timePassed += Time.deltaTime;
+
+            if (timePassed >= TargetTime)
+            {
+                if (PlayerIdle != null) PlayerIdle.SetActive(true);
+                if (PlayerJump != null) PlayerJump.SetActive(false);
+
+                timeRunning = false;
+                timePassed = 0.0f;
+            }
+        }
+
+        if (timeRunning2 == true)
+        {
+            CanPlayerTakeDamage = false;
+
+            if (timePassed2 < TargetTime2)
+                timePassed2 += Time.deltaTime;
+
+            if (timePassed2 >= TargetTime2)
+            {
+                timeRunning2 = false;
+                timePassed2 = 0.0f;
+                CanPlayerTakeDamage = true;
+            }
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (rb.linearVelocity.y <= 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            timeRunning = true;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("TP")) SceneManager.LoadScene(1);
+        if (other.gameObject.CompareTag("Cheater")) SceneManager.LoadScene(6);
+
+        if (other.gameObject.CompareTag("HEAL"))
+        {
+            if (CurrentHealth < MaxHealth) CurrentHealth++;
+            if (CurrentHealth >= 2 && Health2 != null) Health2.SetActive(true);
+            if (CurrentHealth == MaxHealth && Health3 != null) Health3.SetActive(true);
+        }
+
+        if (other.gameObject.CompareTag("Score"))
+        {
+            count += 50;
+            SetCountText();
+        }
+
+        if (other.gameObject.CompareTag("Chest"))
+        {
+            count += 100;
+            SetCountText();
+            if (CurrentHealth < MaxHealth) CurrentHealth++;
+        }
+
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            timeRunning2 = true;
+
+            if (CanPlayerTakeDamage == true)
+            {
+                if (CurrentHealth > 0) CurrentHealth--;
+            }
+
+            if (CurrentHealth == 0)
+            {
+                SceneManager.LoadScene(7);
+            }
+        }
+
+        if (other.gameObject.CompareTag("Bottom")) SceneManager.LoadScene(2);
+    }
+}
