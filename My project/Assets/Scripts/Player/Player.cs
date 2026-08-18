@@ -12,6 +12,8 @@ public class PlayerAutoJump : MonoBehaviour
     public float jumpForce = 12f;
     private int CurrentHealth = 1;
 
+    // --- NEW INPUT SYSTEM VARIABLE ---
+    public InputAction moveAction;
 
     public GameObject PlayerIdle;
     public GameObject PlayerJump;
@@ -33,6 +35,16 @@ public class PlayerAutoJump : MonoBehaviour
     public float TargetTime2 = 5.0f;
     private bool CanPlayerTakeDamage = true;
 
+    // --- ENABLE/DISABLE INPUT ACTION ---
+    private void OnEnable()
+    {
+        moveAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        moveAction.Disable();
+    }
 
     void Start()
     {
@@ -77,9 +89,9 @@ public class PlayerAutoJump : MonoBehaviour
             if (Health3 != null) Health3.SetActive(false);
         }
 
-        float inputX = Input.GetAxis("Horizontal");
+        // --- READ FROM NEW INPUT SYSTEM ---
+        float inputX = moveAction.ReadValue<float>();
         rb.linearVelocity = new Vector2(inputX * moveSpeed, rb.linearVelocity.y);
-
 
         float halfWidth = Camera.main.orthographicSize * Camera.main.aspect;
         Vector3 pos = transform.position;
@@ -88,7 +100,6 @@ public class PlayerAutoJump : MonoBehaviour
         else if (pos.x < -halfWidth) pos.x = halfWidth;
 
         transform.position = pos;
-
     }
 
     private void FixedUpdate()
