@@ -149,44 +149,9 @@ public class PlayerAutoJump : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("TP")) SceneManager.LoadScene(1);
-        if (other.gameObject.CompareTag("Cheater")) SceneManager.LoadScene(6);
-
-        if (other.gameObject.CompareTag("HEAL"))
+        if (other.gameObject.CompareTag("Win"))
         {
-            if (CurrentHealth < MaxHealth) CurrentHealth++;
-            if (CurrentHealth >= 2 && Health2 != null) Health2.SetActive(true);
-            if (CurrentHealth == MaxHealth && Health3 != null) Health3.SetActive(true);
+            SceneManager.LoadScene(3);
         }
-
-        if (other.gameObject.CompareTag("Score"))
-        {
-            count += 50;
-            SetCountText();
-        }
-
-        if (other.gameObject.CompareTag("Chest"))
-        {
-            count += 100;
-            SetCountText();
-            if (CurrentHealth < MaxHealth) CurrentHealth++;
-        }
-
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            timeRunning2 = true;
-
-            if (CanPlayerTakeDamage == true)
-            {
-                if (CurrentHealth > 0) CurrentHealth--;
-            }
-
-            if (CurrentHealth == 0)
-            {
-                SceneManager.LoadScene(7);
-            }
-        }
-
-        if (other.gameObject.CompareTag("Bottom")) SceneManager.LoadScene(2);
     }
 }

@@ -5,7 +5,7 @@ public class Mainmenu : MonoBehaviour
 {
     public void StartGame()
     {
-        SceneManager.LoadScene("Alex");
+        SceneManager.LoadScene("MainScene");
     }
 
     public void QuitGame()
